@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bem-vindo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #58af9b;
+            --secondary-color: #3a8373;
+            --text-color: #2c3e50;
+            --light-bg: #f8f9fa;
+            --white: #ffffff;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+        
+        .welcome-container {
+            background-color: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            padding: 40px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .welcome-header {
+            margin-bottom: 30px;
+        }
+        
+        .welcome-icon {
+            font-size: 60px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .user-email {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: var(--text-color);
+        }
+        
+        .token-info {
+            background-color: var(--light-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .token-section {
+            margin-bottom: 15px;
+        }
+        
+        .token-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+        }
+        
+        .token-value {
+            word-break: break-all;
+            font-family: monospace;
+            background-color: var(--white);
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .countdown {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 20px 0;
+        }
+        
+        .logout-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logout-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .footer {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-container">
+        <div class="welcome-header">
+            <div class="welcome-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1>Bem-vindo ao Sistema</h1>
+            <div class="user-email" id="user-email"></div>
+        </div>
+        
+        <div class="countdown" id="countdown">
+            Seu token expira em: 05:00
+        </div>
+        
+        <div class="token-info">
+            <div class="token-section">
+                <span class="token-label">Token de Acesso:</span>
+                <div class="token-value" id="token-value"></div>
+            </div>
+            <div class="token-section">
+                <span class="token-label">Expiração:</span>
+                <div class="token-value" id="token-expiration"></div>
+            </div>
+        </div>
+        
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Sair do Sistema
+        </button>
+        
+        <div class="footer">
+            Sistema Seguro © 2025 - Todos os direitos reservados
+        </div>
+    </div>
+
+    <script>
+        // Função para formatar o tempo (mm:ss)
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Função principal
+        document.addEventListener('DOMContentLoaded', () => {
+            const email = localStorage.getItem('email');
+            const token = localStorage.getItem('token');
+            const expiraEm = localStorage.getItem('expiraEm');
+            
+            if (!email || !token || !expiraEm) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Exibe as informações do usuário
+            document.getElementById('user-email').textContent = email;
+            document.getElementById('token-value').textContent = token;
+            document.getElementById('token-expiration').textContent = expiraEm;
+            
+            // Configura o contador regressivo (5 minutos = 300 segundos)
+            let timeLeft = 300; // 5 minutos em segundos
+            const countdownElement = document.getElementById('countdown');
+            
+            // Atualiza o contador a cada segundo
+            const countdownInterval = setInterval(() => {
+                timeLeft--;
+                
+                // Atualiza o display
+                countdownElement.textContent = `Seu token expira em: ${formatTime(timeLeft)}`;
+                
+                // Quando o tempo acabar
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    countdownElement.textContent = "Seu token expirou!";
+                    countdownElement.style.color = "#e74c3c";
+                    
+                    // Opcional: fazer logout automático após 5 segundos
+                    setTimeout(() => {
+                        alert("Sua sessão expirou. Por favor, faça login novamente.");
+                        logout();
+                    }, 5000);
+                }
+                
+                // Muda a cor quando faltam 30 segundos
+                if (timeLeft <= 30) {
+                    countdownElement.style.color = "#e74c3c";
+                }
+            }, 1000);
+        });
+        
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
